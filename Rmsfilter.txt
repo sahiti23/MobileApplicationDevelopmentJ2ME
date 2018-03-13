@@ -1,0 +1,82 @@
+import javax.microedition.lcdui.*;
+import javax.microedition.midlet.*;
+import javax.microedition.rms.*;
+import javax.microedition.io.*;
+import java.io.*;
+public class Rmsfilter extends MIDlet implements CommandListener
+{
+	Display disp;
+	Form f;
+	TextField nme,age;
+	Command add,show;
+	public Rmsfilter()
+	{
+		disp=Display.getDisplay(this);
+		f=new Form("person details");
+		nme=new TextField("enter name:","",30,TextField.ANY);
+		age=new TextField("enter age:","",5,TextField.NUMERIC);
+		add=new Command("add",Command.OK,1);
+		show=new Command("show",Command.OK,2);
+		f.append(nme);
+		f.append(age);
+		f.addCommand(add);
+		f.addCommand(show);
+		f.setCommandListener(this);
+	
+	}
+	public void startApp()
+	{
+		disp.setCurrent(f);
+	}
+	public void pauseApp()
+	{}
+	public void destroyApp(boolean b)
+	{}
+	public void commandAction(Command cmd,Displayable d)
+	{
+		if(cmd==add)
+		{
+			RecordStore rs;
+			try{
+				rs=RecordStore.openRecordStore("names4",true);
+				String n=name.getString();
+				int a=Integer.parseInt(age.getString());
+				ByteArrayOutputStream bos=new ByteArrayOutputStream();
+				DataOutputStream dos=new DataOutputStream(bos);
+				dos.writeUTF(n);
+				dos.writeInt(a);
+				dos.flush();
+				byte[] b=bos.toByteArray();
+				int z=rs.addRecord(b,0,b.length);
+				System.out.println(z);
+				rs.closeRecordStore();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		if(cmd==show)
+		{
+			RecordStore rs;
+			try{
+				rs=RecordStore.openRecordStore("names4",true);
+				byte[] b;
+				int n=rs.getNumRecords();
+				RecordEnumeration re=rs.enumerateRecords(null,new Nmefilter(demo),false);
+				for(int i=1;i<=n;i++)
+				{
+					
+					b=re.nextRecord();
+					System.out.println(new String(b));
+					f.append(new StringItem("",new String(b)));
+				}
+				rs.closeRecordStore();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+}
